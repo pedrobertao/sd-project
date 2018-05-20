@@ -1,0 +1,29 @@
+{% extends "layout.html" %} {% block title %}Index{% endblock %} {% block head %} {{ super() }}
+<style type="text/css">
+    .important {
+        color: #336699;
+    }
+</style>
+{% endblock %} 
+
+{% block content %}
+    <section class="documents">
+        <h1>Seu documento</h1>
+        <textarea rows="10" cols="50">
+            {{docinfo.info}}        
+        </textarea>
+        {% if docinfo.sign %}
+        {%for f in docinfo.fields %}
+        <p class="field">{{f}}</p>
+        {% endfor %}
+        <p>Documento foi assinado</p>
+        {% else %}
+        <p>Documento não foi assinado ainda</p>
+        {% endif %}
+    </section>
+    <script>
+        const myDocs ='{{docinfo}}';
+        console.log(">!>!", myDocs);
+    </script>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+ {% extends "layout.html" %} {% block title %}Index{% endblock %} {% block head %} {{ super() }}
+<style type="text/css">
+    .important {
+        color: #336699;
+    }
+</style>
+{% endblock %} {% block content %}
+<section class="documents">
+    <h1 id="msgs">Documentos assinados nos seus canais</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th>Tópico</th>
+                <th>Foi assinado</th>
+                <th>Emitido em</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {%for document in documents%}
+            <tr>
+                <td class="sign-doc">{{document.user}}</td>
+                <td class="sign-doc">{{document.docType}}</td>
+                <td class="sign-doc">{{document.signed}}</td>
+                <td class="sign-doc">{{document.emitted}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

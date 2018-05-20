@@ -1,0 +1,30 @@
+{% extends "layout.html" %} {% block title %}Index{% endblock %} {% block head %} {{ super() }}
+<style type="text/css">
+    .important {
+        color: #336699;
+    }
+</style>
+{% endblock %} 
+
+{% block content %}
+    <section class="documents">
+        <h1>Verifique e assine este documento por favor</h1>
+        <textarea rows="10" cols="50">
+            {{docinfo.info}}        
+        </textarea>
+        {%for f in docinfo.fields %}
+        <span class="field">{{f}}</span>
+        <input class="field"type="text" placeholder="Digite {{f}}">
+        {% endfor %}
+        <form method="POST">
+            <input type="hidden" name="docId" value={{docinfo.docId}}>
+            <button type="submit" value="Assinar" name="sign">Assinar</button>
+        </form>
+    </section>
+
+    <script>
+        const myDocs ='{{docinfo}}';
+        console.log(">!>!", myDocs);
+    </script>
+
+{% endblock %}

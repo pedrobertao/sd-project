@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
+    <title>Document</title>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.js"></script>
+</head>
+
+<body>
+    <h1>Login Page</h1>
+    <form method="POST">
+        <span>Usuário</span>
+        <input type="text" name="username" id="User">
+        <span>Senha</span>
+        <input type="password" name="password" id="password">
+        <input type="submit" value="Login" />
+    </form>
+
+</body>
+<script>
+    var pubnub = new PubNub({
+        subscribeKey: "sub-c-163d074e-4fa0-11e8-9b12-d6295e8dfe4d",
+        publishKey: "pub-c-43a45a3e-507d-4731-aa9c-6fd3adb207fb",
+        ssl: false
+    })
+
+    pubnub.addListener({
+        message: function (m) {
+            // handle message
+            var channelName = m.channel; // The channel for which the message belongs
+            var channelGroup = m.subscription; // The channel group or wildcard subscription match (if exists)
+            var pubTT = m.timetoken; // Publish timetoken
+            var msg = m.message; // The Payload
+            console.log(">>>>>>>>", m);
+
+        },
+        presence: function (p) {
+            // handle presence
+            var action = p.action; // Can be join, leave, state-change or timeout
+            var channelName = p.channel; // The channel for which the message belongs
+            var occupancy = p.occupancy; // No. of users connected with the channel
+            var state = p.state; // User State
+            var channelGroup = p.subscription; //  The channel group or wildcard subscription match (if exists)
+            var publishTime = p.timestamp; // Publish timetoken
+            var timetoken = p.timetoken;  // Current timetoken
+            var uuid = p.uuid; // UUIDs of users who are connected with the 
+
+        },
+        status: function (s) {
+            var affectedChannelGroups = s.affectedChannelGroups;
+            var affectedChannels = s.affectedChannels;
+            var category = s.category;
+            var operation = s.operation;
+
+            console.log("Status", s);
+        }
+    });
+
+    pubnub.subscribe({
+        channels: ['adm_channel'],
+    });
+
+    // pubnub.publish(
+    //     {
+    //         message: {
+    //             such: 'object'
+    //         },
+    //         channel: 'adm_channel',
+    //         sendByPost: false, // true to send via post
+    //         storeInHistory: false, //override default storage options
+    //         meta: {
+    //             "cool": "meta"
+    //         }   // publish extra meta with the request
+    //     },
+    //     function (status, response) {
+    //         if (status.error) {
+    //             // handle error
+    //             console.log(status)
+    //         } else {
+    //             console.log("message Published w/ timetoken", response.timetoken)
+    //         }
+    //     }
+    // );
+
+</script>
+
+</html>
