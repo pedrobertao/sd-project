@@ -2,11 +2,11 @@ import docx
 import re
 import hashlib
 
-def create_document(filepath, doc_type=None topic=None, author=None, text=None, date=None, signature=None):
-    document = docx.Document(filepath)
+def create_document(template_path, doc_type=None, topic=None, author=None, text=None, date=None, signature=None):
+    document = docx.Document(template_path)
     for paragraph in document.paragraphs:
         if(doc_type!=None):
-            paragraph.text = re.sub(r'__TYPE__', topic, paragraph.text)
+            paragraph.text = re.sub(r'__TYPE__', doc_type, paragraph.text)
         if(topic!=None):
             paragraph.text = re.sub(r'__TOPIC__', topic, paragraph.text)
         if(author!=None):
