@@ -7,23 +7,28 @@
 {% endblock %} {% block content %}
 <section class="documents">
     <h1 id="msgs">Documentos assinados nos seus canais</h1>
-    <table>
+    <table class="table     table-dark">
         <thead>
             <tr>
+                <th>#ID</th>
                 <th>Usuário</th>
                 <th>Tópico</th>
-                <th>Foi assinado</th>
+                <th>Verificado em</th>
+                <th>Assinado em</th>
                 <th>Emitido em</th>
-                <th></th>
+                <th>Finalizado em</th>
             </tr>
         </thead>
         <tbody>
             {%for document in documents%}
             <tr>
+                <td class="sign-doc">{{document.docId}}</td>
                 <td class="sign-doc">{{document.user}}</td>
                 <td class="sign-doc">{{document.docType}}</td>
+                <td class="sign-doc">{{document.verified}}</td>
                 <td class="sign-doc">{{document.signed}}</td>
                 <td class="sign-doc">{{document.emitted}}</td>
+                <td class="sign-doc">{{document.finalDate}}</td>
             </tr>
             {% endfor %}
         </tbody>

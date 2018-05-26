@@ -7,11 +7,12 @@
 {% endblock %} 
 
 {% block content %}
-    <section class="documents">
-        <h1>Verifique e assine este documento por favor</h1>
+    <section class="container">
+        <h1>Analise seu documento</h1>
         <textarea rows="10" cols="50">
             {{docinfo.info}}        
         </textarea>
+        {% if not docinfo.verifyOnly %}
         {%for f in docinfo.fields %}
         <span class="field">{{f}}</span>
         <input class="field"type="text" placeholder="Digite {{f}}">
@@ -20,6 +21,9 @@
             <input type="hidden" name="docId" value={{docinfo.docId}}>
             <button type="submit" value="Assinar" name="sign">Assinar</button>
         </form>
+        {% else %}
+        <button class="card-link btn btn-success" disabled>Documento marcado como verificado!</button>
+        {% endif %}
     </section>
 
     <script>

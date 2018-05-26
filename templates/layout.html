@@ -143,7 +143,6 @@
             // });
 
             // localStorage.setItem('msg', myMsgs);
-            console.log(">>>", m.message);
             modalText.innerText = m.message.msg
             modal.style.display = "block";
         },
@@ -165,7 +164,6 @@
             var category = s.category;
             var operation = s.operation;
 
-            console.log(">>>>Status", s);
         }
     });
 
@@ -176,7 +174,8 @@
     } else {
         channelSub = '{{g.userGroups}}'.split(',')
     }
-    console.log("auhsua", channelSub);
+    channelSub.push('{{g.user}}');
+    console.log("Channel SUB", channelSub);
     pubnub.subscribe({
         channels: channelSub
     });
