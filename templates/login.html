@@ -5,20 +5,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
-    <title>Document</title>
+    <link rel="screen" href= "{{ url_for('static', filename='styles/bootstrap.min.css') }}">
+    <link rel="sccren" href= "{{ url_for('static', filename='styles/login.css') }}">
+    <title>Projeto SD</title>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.js"></script>
 </head>
 
-<body>
-    <h1>Login Page</h1>
-    <form method="POST">
-        <span>Usuário</span>
-        <input type="text" name="username" id="User">
-        <span>Senha</span>
-        <input type="password" name="password" id="password">
-        <input type="submit" value="Login" />
-    </form>
+<body background="{{ url_for('static', filename='img/bg.png') }}">
+    <div class="login-box">
+      <br>
+      <h1 class="text-center">Projeto SD</h1>
+      <br>
+      <br>
+      <form method="POST">
+        <div class="form-group">
+          <input type="text" class="form-control" id="User" name="username" placeholder="Usuário">
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" id="password" name="password" placeholder="Senha">
+        </div>
+        <div class="form-group">
+          <input class="btn btn-primary login-button" type="submit" value="Entrar" />
+        </div>
+
+      </form>
+
+    </div>
+
 
 </body>
 <script>
@@ -47,7 +60,7 @@
             var channelGroup = p.subscription; //  The channel group or wildcard subscription match (if exists)
             var publishTime = p.timestamp; // Publish timetoken
             var timetoken = p.timetoken;  // Current timetoken
-            var uuid = p.uuid; // UUIDs of users who are connected with the 
+            var uuid = p.uuid; // UUIDs of users who are connected with the
 
         },
         status: function (s) {
