@@ -5,8 +5,13 @@
     }
 </style>
 {% endblock %} {% block content %}
-<div class="container center">
-    <h4>Seus documentos aqui</h4>
+<div class="jumbotron">
+  <div class="container">
+    <h1>Documentos {{ g.user }}</h1>
+  </div>
+</div>
+<div class="container center bg-white">
+
     <div class="center">
         {%for document in documents%}
         <div class="card" style="width: 18rem;">

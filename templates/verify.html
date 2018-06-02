@@ -4,13 +4,19 @@
         color: #336699;
     }
 </style>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
-    <section class="documents">
+    <div class="jumbotron mb-0">
+      <div class="container">
         <h1>Seu documento</h1>
-        <textarea rows="10" cols="50">
-            {{docinfo.info}}        
+      </div>
+    </div>
+    <section class="documents">
+        <div class="container pt-3 bg-white container-box" style="margin-top:-15px">
+
+        <textarea rows="10" cols="50" style="width:100%">
+            {{docinfo.info}}
         </textarea>
         {% if docinfo.sign %}
         {%for f in docinfo.fields %}
@@ -20,6 +26,9 @@
         {% else %}
         <p>Documento não foi assinado ainda</p>
         {% endif %}
+      </div>
+
+
     </section>
     <script>
         const myDocs ='{{docinfo}}';

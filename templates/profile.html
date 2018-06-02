@@ -4,16 +4,26 @@
         color: #336699;
     }
 </style>
-{% endblock %} 
+{% endblock %}
 {% block content %}
     <section class="">
-        <h1>Bem-Vindo de volta {{ g.user }}</h1>
+
+      <div class="jumbotron">
+        <div class="container">
+          <h1>Bem-Vindo de volta {{ g.user }}</h1>
+        </div>
+      </div>
+      <div class="container bg-white container-box" style="margin-top:-45px">
         <div id="msgs-container">
             <h4 id="msgs">Sua mensagem vai aparecer aqui</h4>
+
+
+          <!-- <form method="POST">
+                  <input type="hidden" name="docId" value="">
+                  <input type="hidden" name="userType" value="">
+          </form> -->
         </div>
-        <!-- <form method="POST">
-                <input type="hidden" name="docId" value="">
-                <input type="hidden" name="userType" value="">
-        </form> -->
+      </div>
+
     </section>
 {% endblock %}

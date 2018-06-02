@@ -5,31 +5,39 @@
     }
 </style>
 {% endblock %} {% block content %}
-<section class="documents">
-    <h1 id="msgs">Publique um documento</h1>
-    {%for document in documents%}
-    <div>
-        <h1>Nome do documento: {{document.name}}</h1>
-        <h3>Tipo: {{document.type}}</h3>
-        <div>
-            <p>{{document.info}}</p>
-        </div>
-        <div>
-            <h4>Campos do documento</h4>
-            {% for f in document.fields%}
-            <span class="fields">{{f}}</span class="fields">
-            {% endfor %}
-        </div>
-        <div>
-            <form method="POST">
-                <input type="hidden" value="{{document.type}}" name="docType" /> 
-                {% for f in document.groups%}
-                <input type="checkbox" name="groups" value="{{f}}">{{f}}</input>
-                <br> {% endfor %}
-                <button type="submit" value="publish" name="publish">Publicar</button>
-            </form>
-        </div>
-    </div>
-    {% endfor %}
-</section>
+<div class="jumbotron mb-0">
+  <div class="container">
+    <h1>Publicar</h1>
+  </div>
+</div>
+<div class="container container-box bg-white" style="margin-top:-15px">
+  <section class="documents">
+      {# <h1 id="msgs">Publique um documento</h1> #}
+      {%for document in documents%}
+      <div>
+          <h1>Nome do documento: {{document.name}}</h1>
+          <h3>Tipo: {{document.type}}</h3>
+          <div>
+              <p>{{document.info}}</p>
+          </div>
+          <div>
+              <h4>Campos do documento</h4>
+              {% for f in document.fields%}
+              <span class="fields">{{f}}</span class="fields">
+              {% endfor %}
+          </div>
+          <div>
+              <form method="POST">
+                  <input type="hidden" value="{{document.type}}" name="docType" />
+                  {% for f in document.groups%}
+                  <input type="checkbox" name="groups" value="{{f}}">{{f}}</input>
+                  <br> {% endfor %}
+                  <button type="submit" value="publish" name="publish">Publicar</button>
+              </form>
+          </div>
+      </div>
+      {% endfor %}
+  </section>
+</div>
+
 {% endblock %}

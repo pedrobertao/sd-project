@@ -7,7 +7,7 @@ nav{
     width: 100%;
     position: fixed;
     top:0;
-    background-color: aqua;
+    /* background-color: aqua; */
 }
 
 ul{
@@ -15,7 +15,7 @@ ul{
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #333;
+    /* background-color: #333; */
 }
 
 li{
@@ -113,4 +113,20 @@ button{
 .sign-doc{
     display: inline;
     margin: 10px 5px 10px 5px;
+}
+
+.bg-white{
+  background-color: white
+}
+
+.container-box{
+  padding: 20px !important;
+  border-radius: 2px;
+  box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.5);
+}
+
+.jumbotron{
+  background-color: black !important;
+  color: white;
+  border-radius: 0 !important;
 }
