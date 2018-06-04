@@ -3,7 +3,7 @@ import re
 import hashlib
 
 def create_document(template_path, doc_type=None, topic=None, author=None, text=None, date=None, signature=None):
-    document = docx.Document(template_path)
+    document = docx.Document('./media/templates/doc_tempalte.docx')
     for paragraph in document.paragraphs:
         if(doc_type!=None):
             paragraph.text = re.sub(r'__TYPE__', doc_type, paragraph.text)
@@ -20,7 +20,8 @@ def create_document(template_path, doc_type=None, topic=None, author=None, text=
 
     title = author+'-'+topic
     title = re.sub(' ','_',title)
-    document.save('{}.docx'.format(title))
+    #document.save('{}.docx'.format(title))
+    return document
 
 
 def encrypt_string(hash_string):
