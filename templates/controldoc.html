@@ -14,7 +14,7 @@
                 <th>Usuário</th>
                 <th>Tópico</th>
                 <th>Verificado em</th>
-                <th>Assinado em</th>
+                <th>Assinado pelo Usuário em</th>
                 <th>Emitido em</th>
                 <th>Finalizado em</th>
             </tr>
@@ -29,6 +29,16 @@
                 <td class="sign-doc">{{document.signed}}</td>
                 <td class="sign-doc">{{document.emitted}}</td>
                 <td class="sign-doc">{{document.finalDate}}</td>
+                <td class="sign-doc">
+                    {%if document.admSign %}
+                    <button class="card-link btn btn-success" disabled>Assinado</button>
+                    {% else %}
+                    <form method="POST">
+                    <button class="card-link btn btn-primary" type="submit" value="{{document.docId}}" name="sign">Assinar</button>
+                    <input class="card-link" type="hidden" value="{{document.docId}}" name="docId" />
+                    </form>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

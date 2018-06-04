@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='styles/bootstrap.min.css') }}">
-    <title>Profile Page</title>
+    <title>SD PROJECT</title>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -76,10 +76,11 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <a class="nav-item nav-link" href="/">Perfil</a>
-                <a class="nav-item nav-link" href="/documents">Documentos</a>
                 {% if g.userType == 'adm'%}
                 <a class="nav-item nav-link" href="/publishdoc">Publicar Documentos</a>
                 <a class="nav-item nav-link" href="/controldoc">Controle de Documentos</a>
+                {% else %}
+                <a class="nav-item nav-link" href="/documents">Documentos</a>
                 {% endif %}
             </ul>
         </div>

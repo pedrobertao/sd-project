@@ -9,7 +9,7 @@
     <h4>Seus documentos aqui</h4>
     <div class="center">
         {%for document in documents%}
-        <div class="card" style="width: 18rem;">
+        <div class="card" style="width: 100%;">
             <div class="card-body">
                 <h5 class="card-title">{{document.name}} [{{document.id}}]</h5>
                 <h6 class="card-subtitle mb-2 text-muted">Tipo: {{document.type}}</h6>
@@ -21,15 +21,17 @@
                 <p class="card-text">{{document.info}}</p>
                 {% if document.finalDate %}
                 <form method="POST">
-                    {%if not document.sign %}
-                    <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Verificar</button>
-                    {% else %}
-                    <button class="card-link btn btn-primary" type="submit" value="verify" name="verify">Verificar</button>
-                    <button class="card-link btn btn-success" disabled type="submit" value="sign" name="sign">
-                        {% if document.verifyOnly %}Verificado{% else %}Assinado{%endif%}
-                    </button>
-                    {%endif%}
                     {% if document.verifyOnly %}
+                        <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Verificar</button>
+                    {%else%}
+                        {%if not document.sign%}
+                        <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Assinar</button>
+                        {%else%}
+                        <button class="card-link btn btn-primary" type="submit" value="verify" name="verify">Verificar</button>
+                        <button class="card-link btn btn-success" disabled type="submit" value="sign" name="sign">Assinado</button>
+                        {%endif %}
+                    {%endif%}
+                    {%if document.verified%}
                     <button class="card-link btn btn-warning" disabled>Verificado</button>
                     {%endif%}
                     <input class="card-link" type="hidden" value="{{document.id}}" name="docId" />
