@@ -10,13 +10,16 @@ from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 from pubnub.callbacks import SubscribeCallback
 from src.util import create_document 
+
 #TO DO
-# Alert to a single user
+# Alert to a single user <- MAYBE NOT
 # Alert custom messages <- DONE! 
-# Alert to another ADMINS - Pode ter mais de um ADMIN ?
+# Alert to another ADMINS <- Acho que da pra fazer isso já
 # Expires Date to Documents <-DONE !
-# User cannot sign without 
 # Do logout
+# User can only send messages to groups OR users directly, not both
+
+
 app = Flask(__name__)
 app.secret_key = 'trabalho_de_sd_2018'
 app.templates_auto_reload = True
@@ -65,8 +68,8 @@ pubnub.add_listener(MyListener())
 
 
 
-def handle_publish_to_admin(userGroup,user):
-    message = "O usuário %s acabou de assinar o documento" % user
+def handle_publish_to_admin(userGroup,user,docId):
+    message = "O usuário %s acabou de assinar o documento de registro %d" % (user,int(docId))
     group = "adm_"+userGroup
     pubnub.publish().channel(group).message({'type':'normal', 'msg':message}).async(publish_callback)
 
@@ -230,7 +233,6 @@ def documents(name=None):
                 doc['finalDate'] = row[6]
             doc['verifyOnly'] = row[7]
             doc['verified'] = row[8]
-            print(documents)
             documents.append(doc)
             
         # print(documents)
@@ -276,14 +278,15 @@ def sign(doc_id=None):
         return render_template("sign.html",docinfo=docInfo)
 
     else: 
-        print("FORM FORM")
+        dictInfo = request.form.to_dict()
         docId = request.form['docId']
         cursor = db.cursor()
         dateNow = int(time.time())
-        query= "UPDATE userdocs SET signed=FROM_UNIXTIME(%d) WHERE id=%d;" % (int(dateNow), int(docId))
+        fields = ",".join(request.form.getlist('fields'))
+        query= "UPDATE userdocs SET signed=FROM_UNIXTIME(%d),fieldsSign='%s' WHERE id=%d;" % (int(dateNow),fields,int(docId))
         result =  cursor.execute(query)
         db.commit()
-        handle_publish_to_admin(userGroup,user)
+        handle_publish_to_admin(userGroup,user,docId)
         return redirect(url_for('documents'))
 
 
@@ -295,18 +298,21 @@ def verify(verify=None):
     
     cursor = db.cursor()
     docId = request.args['docId'] 
-    query = ("SELECT documents.fields as fields, documents.info as info, userdocs.signed as signed, userdocs.verifyOnly "
+    query = ("SELECT documents.fields as fields, documents.info as info, userdocs.signed as signed, userdocs.verifyOnly, userdocs.fieldsSign "
             "from documents, userdocs "
             "where documents.type in (select userdocs.doc_type from userdocs where userdocs.id = %d) and userdocs.id = %d") % (int(docId), int(docId))
     result = cursor.execute(query)
     docInfo = {}
     for row in cursor:
         docInfo['docId'] = docId
-        fields = row[0].split(',')
-        docInfo['fields'] = fields
         docInfo['info'] = row[1]
         docInfo['sign'] = row[2]
         docInfo['verifyOnly'] = row[3]
+        fields = row[0].split(',')
+        fieldsValues = row[4].split(',')
+        for x in range(0,len(fields)):
+            fields[x] = fields[x] + ':' + fieldsValues[x]
+        docInfo['fields'] = fields
 
     return render_template("verify.html",docinfo=docInfo)
 
@@ -318,6 +324,7 @@ def profile(name=None):
     userGroups = session['userGroups'].split(',');   
     user = session['user'] 
     userType = session['userType']
+
     if request.method == 'POST':
         message = ('[%s]: '% user)+request.form['message'] 
         groupsSelected = request.form.getlist('groups')
@@ -340,7 +347,6 @@ def profile(name=None):
             admUser = 'adm_%s' % userGroups[0]
             userGroups.append(admUser)
 
-        print(queryUsers)
         result = cursor.execute(queryUsers) 
         userList = []
         for row in cursor:
@@ -426,7 +432,6 @@ def controldoc():
             querySearch+= " users.group ='"+group +"' or"
 
         querySearch = querySearch[:-3] + ")"
-        print(querySearch)
         cursor = db.cursor()
         result = cursor.execute(querySearch)
         documents = []
@@ -444,7 +449,6 @@ def controldoc():
         return render_template("controldoc.html", documents = documents)
     else:
         docId = request.form['docId']
-        print(docId)
         dateNow = int(time.time())
         query= "UPDATE userdocs SET admSign=FROM_UNIXTIME(%d) WHERE id=%d;" % (dateNow, int(docId))
         cursor = db.cursor()

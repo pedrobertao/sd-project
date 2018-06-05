@@ -1,9 +1,16 @@
 {% extends "layout.html" %} {% block title %}Index{% endblock %} {% block head %} {{ super() }}
+{% endblock %} 
+{% block content %}
 <style type="text/css">
     .important {
         color: #336699;
     }
+    .doc {
+        width: 80%;
+        height: 200px;
+    }
 </style>
+<<<<<<< HEAD
 {% endblock %} {% block content %}
 <div class="jumbotron mb-0">
   <div class="container">
@@ -11,11 +18,15 @@
   </div>
 </div>
 <div class="container container-box bg-white" style="margin-top:-15px">
+=======
+<div class="container">
+    <h1 id="msgs">Publique um documento</h1>
+>>>>>>> master
     {%for document in documents%}
     <h4>Tópico: {{document.name}}</h4>
     <h5>Tipo: {{document.type}}</h5>
     <div class="row">
-        <textarea rows="10" cols="50">{{document.info}}</textarea>
+        <iframe class="doc" src="{{document.info}}"></iframe>
     </div>
     <div class="row">
         <div class="col">
