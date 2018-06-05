@@ -4,12 +4,12 @@ import mysql.connector
 from datetime import date
 from datetime import datetime
 import time
-from flask import Flask, request, session, render_template, redirect, g, url_for
+from flask import Flask, request, session, render_template, redirect, g, url_for, send_file
 from base64 import b64decode, b16encode
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 from pubnub.callbacks import SubscribeCallback
-from src.util import create_document
+from src.util import create_document, encrypt_string
 
 #TO DO
 # Alert to a single user <- MAYBE NOT
@@ -468,40 +468,36 @@ def publish():
         return "Publiquei !"
 
 @app.route("/download")
-def verify(verify=None):
-    def download(file_id = '1ZdR3L3qP4Bkq8noWLJHSr_iBau0DNT4Kli4SxNc2YEo'):
-        request = drive_service.files().export_media(fileId=file_id,
-                                                     # mimeType='application/pdf'
-                                                     mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                                                     )
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-            print "Download %d%%." % int(status.progress() * 100)
-        return downloader
-
+def download(verify=None):
     global db
     cursor = db.cursor()
     user = session['user']
 
     cursor = db.cursor()
     docId = request.args['docId']
-    query = ("SELECT d.id, d.name, d.info from documents d WHERE d.id = %d") % int(docId)
+    print(docId)
+    query = "SELECT d.id, d.doc_type, d.username, d.emitted, d.fieldsSign from userdocs d WHERE d.id = '{}'".format(docId)
     result = cursor.execute(query)
     docInfo = {}
     for row in cursor:
         docInfo['docId'] = docId
-        docInfo['name'] = row[1]
-        docInfo['info'] = row[2]
-
-
+        docInfo['docType'] = row[1]
+        docInfo['user'] = row[2]
+        docInfo['emitted'] = row[3]
+        docInfo['signature'] = row[4]
+    print(docInfo)
     try:
-		return send_file(self.download(docInfo['info']), attachment_filename=docInfo['name'])
-	except Exception as e:
-		return str(e)
-
+        return send_file(create_document('./src/util/doc_template.docx',
+                                            doc_type=docInfo['docType'],
+                                            topic='TITULO',
+                                            author=docInfo['user'],
+                                            text='TEXTO',
+                                            date=str(docInfo['emitted']),
+                                            signature=encrypt_string(docInfo['signature'])),
+                                        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                        attachment_filename='churrasco.docx')
+    except Exception as e:
+        return str(e)
 
 @app.errorhandler(404)
 def page_not_found(e):
