@@ -5,11 +5,16 @@
     }
 </style>
 {% endblock %} {% block content %}
-<div class="container">
-    <h1>Bem-Vindo de volta {{ g.user }}</h1>
+<div class="">
+    <div class="jumbotron">
+      <div class="container">
+        <h1>Bem-Vindo de volta {{ g.user }}</h1>
+      </div>
+    </div>
 
     <section>
-        <h4>Mandar uma mensagem para seus groupos</h4>
+      <div class="container bg-white container-box" style="margin-top:-45px">
+        <h4>Mandar uma mensagem para seus grupos</h4>
         <form method="POST">
             <div class="form-group">
                 <label for="exampleFormControlTextarea1">Digite sua mensagem</label>
@@ -26,6 +31,7 @@
             </div>
             <button type="submit" class="btn btn-primary">Enviar mensagem</button>
         </form>
+      </div>
     </section>
 
 </div>

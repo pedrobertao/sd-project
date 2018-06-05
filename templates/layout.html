@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='styles/bootstrap.min.css') }}">
-    <title>SD PROJECT</title>
+    <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='styles/style.css') }}">
+    <title>SD Project</title>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -66,7 +67,7 @@
     }
 </style>
 
-<body>
+<body background="{{ url_for('static', filename='img/bg.png') }}">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="/">SD PROJECT</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
@@ -92,6 +93,7 @@
             <p id="modalText"></p>
         </div>
     </div>
+  </div>
 </body>
 
 <script>
@@ -156,7 +158,7 @@
             var channelGroup = p.subscription; //  The channel group or wildcard subscription match (if exists)
             var publishTime = p.timestamp; // Publish timetoken
             var timetoken = p.timetoken;  // Current timetoken
-            var uuid = p.uuid; // UUIDs of users who are connected with the 
+            var uuid = p.uuid; // UUIDs of users who are connected with the
 
         },
         status: function (s) {
