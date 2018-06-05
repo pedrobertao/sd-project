@@ -5,12 +5,12 @@
     }
 </style>
 {% endblock %} {% block content %}
-<div class="jumbotron">
+<div class="jumbotron mb-0">
   <div class="container">
     <h1>Documentos {{ g.user }}</h1>
   </div>
 </div>
-<div class="container center bg-white">
+<div class="container center bg-white pl-0 pr-0"  style="margin-top:-15px">
 
     <div class="center">
         {%for document in documents%}
@@ -40,7 +40,17 @@
                     {%endif%}
                     <input class="card-link" type="hidden" value="{{document.id}}" name="docId" />
                 </form>
+
+
                 {% endif %}
+            </div>
+            <div class="download-button">
+              <form class="card-link" action="/download" method="GET">
+                <button class="btn btn-default" type="submit">
+                  <img src='{{ url_for('static', filename='img/b-download.png') }}' ></img> Download
+                </button>
+                <input class="" type="hidden" value="{{document.id}}" name="docId" />
+              </form>
             </div>
         </div>
         {% endfor %}

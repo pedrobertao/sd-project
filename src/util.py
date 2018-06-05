@@ -21,7 +21,9 @@ def create_document(template_path, doc_type=None, topic=None, author=None, text=
     title = author+'-'+topic
     title = re.sub(' ','_',title)
     #document.save('{}.docx'.format(title))
-    return document
+    document.save('./media/docs/{}.docx'.format(title))
+
+    return './media/docs/{}.docx'.format(title)
 
 
 def encrypt_string(hash_string):
