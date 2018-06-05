@@ -1,5 +1,5 @@
 {% extends "layout.html" %} {% block title %}Index{% endblock %} {% block head %} {{ super() }}
-{% endblock %} 
+{% endblock %}
 {% block content %}
 <style type="text/css">
     .important {
@@ -10,7 +10,6 @@
         height: 200px;
     }
 </style>
-<<<<<<< HEAD
 {% endblock %} {% block content %}
 <div class="jumbotron mb-0">
   <div class="container">
@@ -18,10 +17,6 @@
   </div>
 </div>
 <div class="container container-box bg-white" style="margin-top:-15px">
-=======
-<div class="container">
-    <h1 id="msgs">Publique um documento</h1>
->>>>>>> master
     {%for document in documents%}
     <h4>Tópico: {{document.name}}</h4>
     <h5>Tipo: {{document.type}}</h5>
