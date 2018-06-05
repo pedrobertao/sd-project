@@ -18,7 +18,6 @@
                 {% else %}
                 <h6 style="color:red !important" class="card-subtitle mb-5 text-muted">Seu documento expirou !</h6>
                 {% endif %}
-                <p class="card-text">{{document.info}}</p>
                 {% if document.finalDate %}
                 <form method="POST">
                     {% if document.verifyOnly %}
