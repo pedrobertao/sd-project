@@ -14,25 +14,36 @@
 
     <div class="center">
         {%for document in documents%}
-        <div class="card" style="width: 18rem;">
+        <div class="card" style="width: 100%;">
             <div class="card-body">
                 <h5 class="card-title">{{document.name}} [{{document.id}}]</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{document.type}}</h6>
+                <h6 class="card-subtitle mb-2 text-muted">Tipo: {{document.type}}</h6>
+                {% if document.finalDate %}
+                <h6 class="card-subtitle mb-5 text-muted">Deadline: {{document.finalDate}}</h6>
+                {% else %}
+                <h6 style="color:red !important" class="card-subtitle mb-5 text-muted">Seu documento expirou !</h6>
+                {% endif %}
                 <p class="card-text">{{document.info}}</p>
+                {% if document.finalDate %}
                 <form method="POST">
-                    {%if document.sign == None%}
-                    <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Assinar</button>
+                    {% if document.verifyOnly %}
+                        <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Verificar</button>
+                    {%else%}
+                        {%if not document.sign%}
+                        <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Assinar</button>
+                        {%else%}
+                        <button class="card-link btn btn-primary" type="submit" value="verify" name="verify">Verificar</button>
+                        <button class="card-link btn btn-success" disabled type="submit" value="sign" name="sign">Assinado</button>
+                        {%endif %}
+                    {%endif%}
+                    {%if document.verified%}
+                    <button class="card-link btn btn-warning" disabled>Verificado</button>
                     {%endif%}
                     <input class="card-link" type="hidden" value="{{document.id}}" name="docId" />
-                    <button class="card-link btn btn-primary" type="submit" value="verify" name="verify">Verificar</button>
                 </form>
+                {% endif %}
             </div>
         </div>
-        <!-- <h3>{{document.id}}</h3>
-        <h3>{{document.name}}</h3>
-        <h4>{{document.type}}</h4>
-        <h4>{{document.fields}}</h4> -->
-
         {% endfor %}
     </div>
 </div>

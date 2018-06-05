@@ -11,33 +11,52 @@
   </div>
 </div>
 <div class="container container-box bg-white" style="margin-top:-15px">
-  <section class="documents">
-      {# <h1 id="msgs">Publique um documento</h1> #}
-      {%for document in documents%}
-      <div>
-          <h1>Nome do documento: {{document.name}}</h1>
-          <h3>Tipo: {{document.type}}</h3>
-          <div>
-              <p>{{document.info}}</p>
-          </div>
-          <div>
-              <h4>Campos do documento</h4>
-              {% for f in document.fields%}
-              <span class="fields">{{f}}</span class="fields">
-              {% endfor %}
-          </div>
-          <div>
-              <form method="POST">
-                  <input type="hidden" value="{{document.type}}" name="docType" />
-                  {% for f in document.groups%}
-                  <input type="checkbox" name="groups" value="{{f}}">{{f}}</input>
-                  <br> {% endfor %}
-                  <button type="submit" value="publish" name="publish">Publicar</button>
-              </form>
-          </div>
-      </div>
-      {% endfor %}
-  </section>
+    {%for document in documents%}
+    <h4>Tópico: {{document.name}}</h4>
+    <h5>Tipo: {{document.type}}</h5>
+    <div class="row">
+        <textarea rows="10" cols="50">{{document.info}}</textarea>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label>Campos do documento</label>
+            {% for f in document.fields%}
+            <span class="fields">{{f}}</span class="fields">
+            {% endfor %}
+        </div>
+    </div>
+    <div class="row">
+        <form method="POST">
+            <div class="form-group">
+                <label>Grupos</label>
+                <input type="hidden" value="{{document.type}}" name="docType" />
+                <div class="form-check form-check-inline">
+                {% for f in document.groups%}
+                <input class="form-check-input" type="checkbox" name="groups" value="{{f}}"/>
+                <label class="form-check-label" for="inlineCheckbox2">{{f}}</label>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Usuário</label>
+                <input type="hidden" value="{{document.type}}" name="docType" />
+                <div class="form-check form-check-inline">
+                {% for u in document.userList %}
+                <input class="form-check-input" type="checkbox" name="users" value="{{u}}"/>
+                <label class="form-check-label" for="inlineCheckbox2">{{u}}</label>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>DeadLine</label>
+                <input class="form-control" type="date" name="finalDate" id="finalDate">
+            </div>
+            <div class="form-group">
+                <input class="form-check-label" type="checkbox" name="verifyOnly" value="true">Somente Leitura</input>
+            </div>
+            <button class="btn btn-primary" type="submit" value="publish" name="publish">Publicar</button>
+        </form>
+    </div>
+    {% endfor %}
 </div>
-
 {% endblock %}

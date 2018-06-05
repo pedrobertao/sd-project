@@ -15,20 +15,20 @@
     <section class="documents">
         <div class="container pt-3 bg-white container-box" style="margin-top:-15px">
 
-        <textarea rows="10" cols="50" style="width:100%">
-            {{docinfo.info}}
-        </textarea>
-        {% if docinfo.sign %}
-        {%for f in docinfo.fields %}
-        <p class="field">{{f}}</p>
-        {% endfor %}
-        <p>Documento foi assinado</p>
-        {% else %}
-        <p>Documento não foi assinado ainda</p>
-        {% endif %}
-      </div>
-
-
+          <textarea rows="10" cols="50" style="width:100%">
+              {{docinfo.info}}
+          </textarea>
+          {% if docinfo.sign %}
+          {%for f in docinfo.fields %}
+          <p class="field">{{f}}</p>
+          {% endfor %}
+          <p>Documento foi assinado</p>
+          {% else %}
+          <p>Documento não foi assinado ainda</p>
+          <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Assinar</button>
+          {% endif %}
+          <button class="card-link btn btn-success" disabled type="submit" value="sign" name="sign">Assinado</button>
+        </div>
     </section>
     <script>
         const myDocs ='{{docinfo}}';

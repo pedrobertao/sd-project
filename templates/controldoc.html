@@ -13,23 +13,38 @@
 <div class="container container-box bg-white" style="margin-top:-15px">
   <section class="documents">
       {# <h1 id="msgs">Documentos assinados nos seus canais</h1> #}
-      <table>
+      <table class="table     table-dark">
           <thead>
               <tr>
+                  <th>#ID</th>
                   <th>Usuário</th>
                   <th>Tópico</th>
-                  <th>Foi assinado</th>
+                  <th>Verificado em</th>
+                  <th>Assinado pelo Usuário em</th>
                   <th>Emitido em</th>
-                  <th></th>
+                  <th>Finalizado em</th>
               </tr>
           </thead>
           <tbody>
               {%for document in documents%}
               <tr>
+                  <td class="sign-doc">{{document.docId}}</td>
                   <td class="sign-doc">{{document.user}}</td>
                   <td class="sign-doc">{{document.docType}}</td>
+                  <td class="sign-doc">{{document.verified}}</td>
                   <td class="sign-doc">{{document.signed}}</td>
                   <td class="sign-doc">{{document.emitted}}</td>
+                  <td class="sign-doc">{{document.finalDate}}</td>
+                  <td class="sign-doc">
+                      {%if document.admSign %}
+                      <button class="card-link btn btn-success" disabled>Assinado</button>
+                      {% else %}
+                      <form method="POST">
+                      <button class="card-link btn btn-primary" type="submit" value="{{document.docId}}" name="sign">Assinar</button>
+                      <input class="card-link" type="hidden" value="{{document.docId}}" name="docId" />
+                      </form>
+                      {% endif %}
+                  </td>
               </tr>
               {% endfor %}
           </tbody>
