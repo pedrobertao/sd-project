@@ -9,11 +9,11 @@ from base64 import b64decode, b16encode
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 from pubnub.callbacks import SubscribeCallback
-from src.util import create_document 
+from src.util import create_document
 
 #TO DO
 # Alert to a single user <- MAYBE NOT
-# Alert custom messages <- DONE! 
+# Alert custom messages <- DONE!
 # Alert to another ADMINS <- Acho que da pra fazer isso já
 # Expires Date to Documents <-DONE !
 # Do logout
@@ -55,13 +55,13 @@ cursor = db.cursor()
 class MyListener(SubscribeCallback):
     def status(self, pubnub, status):
        pass
- 
+
     def message(self, pubnub, message):
         pass
- 
+
     def presence(self, pubnub, presence):
         pass
- 
+
 
 pubnub.add_listener(MyListener())
 
@@ -87,7 +87,7 @@ def handle_mark_as_verified(docId):
 def handle_insert_docs_users_only(users,docType,finalDate, verifyOnly):
     global db
     cursor = db.cursor()
-    user = session['user'] 
+    user = session['user']
     dateNow = int(time.time())
     queryValues = ""
 
@@ -104,7 +104,7 @@ def handle_insert_docs_users_only(users,docType,finalDate, verifyOnly):
 def handle_insert_docs(groups,docType,finalDate, verifyOnly):
     global db
     cursor = db.cursor()
-    user = session['user'] 
+    user = session['user']
     dateNow = int(time.time())
 
     querySearch = "select username from users where"
@@ -113,7 +113,7 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
 
 
     cursor.execute(querySearch[:-3])
-    users = [] 
+    users = []
     for row in cursor:
         users.append(row[0])
 
@@ -127,7 +127,7 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
     db.commit()
 
     return
-    
+
 
 def handle_publish_docs(groups):
     print("Groups to Publish")
@@ -186,8 +186,8 @@ def index():
         if 'user' in session:
             return redirect(url_for('profile'))
     if request.method == 'POST':
-        user = request.form['username'] 
-        password = request.form['password'] 
+        user = request.form['username']
+        password = request.form['password']
         if handle_login(user,password):
             cursor = db.cursor()
             query = ("SELECT users.type, users.group from users where username ='%s'" % (user))
@@ -229,12 +229,12 @@ def documents(name=None):
             finalDate = datetime.strptime(str(row[6]),"%Y-%m-%d %H:%M:%S")
             if finalDate.date() < date.today() and doc['sign'] == None:
                 doc['finalDate'] = False
-            else: 
+            else:
                 doc['finalDate'] = row[6]
             doc['verifyOnly'] = row[7]
             doc['verified'] = row[8]
             documents.append(doc)
-            
+
         # print(documents)
 
         return render_template("documents.html", documents=documents)
@@ -250,7 +250,7 @@ def documents(name=None):
         else:
             return redirect(url_for('sign',docId = docId))
 
- 
+
 
 @app.route("/sign",methods=['GET', 'POST'])
 def sign(doc_id=None):
@@ -261,7 +261,7 @@ def sign(doc_id=None):
     userType = session['userType']
     if request.method == 'GET':
         cursor = db.cursor()
-        docId = request.args['docId'] 
+        docId = request.args['docId']
 
         query = ("SELECT documents.fields as fields, documents.info as info, userdocs.verifyOnly "
                 "from documents,userdocs "
@@ -274,10 +274,10 @@ def sign(doc_id=None):
             docInfo['fields'] = fields
             docInfo['info'] = row[1]
             docInfo['verifyOnly'] = row[2]
-    
+
         return render_template("sign.html",docinfo=docInfo)
 
-    else: 
+    else:
         dictInfo = request.form.to_dict()
         docId = request.form['docId']
         cursor = db.cursor()
@@ -295,9 +295,9 @@ def verify(verify=None):
     global db
     cursor = db.cursor()
     user = session['user']
-    
+
     cursor = db.cursor()
-    docId = request.args['docId'] 
+    docId = request.args['docId']
     query = ("SELECT documents.fields as fields, documents.info as info, userdocs.signed as signed, userdocs.verifyOnly, userdocs.fieldsSign "
             "from documents, userdocs "
             "where documents.type in (select userdocs.doc_type from userdocs where userdocs.id = %d) and userdocs.id = %d") % (int(docId), int(docId))
@@ -321,15 +321,15 @@ def verify(verify=None):
 def profile(name=None):
     global db
     cursor = db.cursor()
-    userGroups = session['userGroups'].split(',');   
-    user = session['user'] 
+    userGroups = session['userGroups'].split(',');
+    user = session['user']
     userType = session['userType']
 
     if request.method == 'POST':
-        message = ('[%s]: '% user)+request.form['message'] 
+        message = ('[%s]: '% user)+request.form['message']
         groupsSelected = request.form.getlist('groups')
-        for group in groupsSelected: 
-            pubnub.publish().channel(group).message({'type':'normal', 'msg':message}).async(publish_callback)    
+        for group in groupsSelected:
+            pubnub.publish().channel(group).message({'type':'normal', 'msg':message}).async(publish_callback)
             if userType == 'user':
                 pubnub.publish().channel('adm_'+group).message({'type':'normal', 'msg':message}).async(publish_callback)
         return redirect(url_for('profile'))
@@ -347,7 +347,7 @@ def profile(name=None):
             admUser = 'adm_%s' % userGroups[0]
             userGroups.append(admUser)
 
-        result = cursor.execute(queryUsers) 
+        result = cursor.execute(queryUsers)
         userList = []
         for row in cursor:
             userList.append(row[0])
@@ -379,13 +379,13 @@ def publishdoc():
             groups = row[5].split(',')
             doc['groups'] = groups
             documents.append(doc)
-        
+
         queryUsers = ("SELECT users.username "
                             "FROM users "
                             "where ")
         for group in groups:
             queryUsers+= " users.group ='"+group +"' or"
-        
+
         queryUsers = queryUsers[:-3]
         result = cursor.execute(queryUsers)
         userList = []
@@ -398,11 +398,11 @@ def publishdoc():
         return render_template("publishdoc.html", documents = documents)
     else :
         dictInfo = request.form.to_dict()
-        docType = request.form['docType'] 
+        docType = request.form['docType']
 
         if 'verifyOnly' in dictInfo:
             verifyOnly = request.form['verifyOnly']
-        else: 
+        else:
             verifyOnly = False
 
         finalDate = request.form['finalDate']
@@ -441,11 +441,11 @@ def controldoc():
             doc['docType'] = row[1]
             doc['user'] = row[2]
             doc['signed'] = row[3]
-            doc['emitted'] = row[4] 
-            doc['finalDate'] = row[5] 
+            doc['emitted'] = row[4]
+            doc['finalDate'] = row[5]
             doc['admSign'] = row[7]
             doc['verified'] = row[8]
-            documents.append(doc)    
+            documents.append(doc)
         return render_template("controldoc.html", documents = documents)
     else:
         docId = request.form['docId']
@@ -467,6 +467,42 @@ def publish():
         pubnub.publish().channel("adm_channel").message({'type': 'document_one', 'deadline': '12/12/2018'}).async(publish_callback)
         return "Publiquei !"
 
+@app.route("/download")
+def verify(verify=None):
+    def download(file_id = '1ZdR3L3qP4Bkq8noWLJHSr_iBau0DNT4Kli4SxNc2YEo'):
+        request = drive_service.files().export_media(fileId=file_id,
+                                                     # mimeType='application/pdf'
+                                                     mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                                     )
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+            print "Download %d%%." % int(status.progress() * 100)
+        return downloader
+
+    global db
+    cursor = db.cursor()
+    user = session['user']
+
+    cursor = db.cursor()
+    docId = request.args['docId']
+    query = ("SELECT d.id, d.name, d.info from documents d WHERE d.id = %d") % int(docId)
+    result = cursor.execute(query)
+    docInfo = {}
+    for row in cursor:
+        docInfo['docId'] = docId
+        docInfo['name'] = row[1]
+        docInfo['info'] = row[2]
+
+
+    try:
+		return send_file(self.download(docInfo['info']), attachment_filename=docInfo['name'])
+	except Exception as e:
+		return str(e)
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     # Todo handle not found
@@ -474,4 +510,3 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     app.run(host='localhost')
-
