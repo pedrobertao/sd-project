@@ -11,15 +11,6 @@ from pubnub.pubnub import PubNub
 from pubnub.callbacks import SubscribeCallback
 from src.util import create_document, encrypt_string
 
-#TO DO
-# Alert to a single user <- MAYBE NOT
-# Alert custom messages <- DONE!
-# Alert to another ADMINS <- Acho que da pra fazer isso já
-# Expires Date to Documents <-DONE !
-# Do logout
-# User can only send messages to groups OR users directly, not both
-
-
 app = Flask(__name__)
 app.secret_key = 'trabalho_de_sd_2018'
 app.templates_auto_reload = True
@@ -30,7 +21,6 @@ ldap_base = "dc=sd,dc=com"
 con = ldap.initialize('ldap://127.0.0.1')
 my_password = 'admin'
 con.simple_bind_s("cn=admin,dc=sd,dc=com", my_password)
-# result = con.search_s(ldap_base, ldap.SCOPE_SUBTREE, query,['cn','mail','userPassword'])
 
 #PubNub
 global pubnub
@@ -51,7 +41,6 @@ global cursor;
 cursor = db.cursor()
 
 
-# print(documents)
 class MyListener(SubscribeCallback):
     def status(self, pubnub, status):
        pass
@@ -95,7 +84,6 @@ def handle_insert_docs_users_only(users,docType,finalDate, verifyOnly):
         val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s ), " % (docType, u,dateNow,finalDate,verifyOnly)
         queryValues+= val
     finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly) values " + queryValues
-    print(finalQuery[:-2])
     cursor.execute(finalQuery[:-2])
     db.commit()
     return
@@ -122,7 +110,6 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
         val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s ), " % (docType, u,dateNow,finalDate,verifyOnly)
         queryValues+= val
     finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly) values " + queryValues
-    print(finalQuery[:-2])
     cursor.execute(finalQuery[:-2])
     db.commit()
 
@@ -130,8 +117,6 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
 
 
 def handle_publish_docs(groups):
-    print("Groups to Publish")
-    print(groups)
     global pubnub
     for group in groups:
         pubnub.publish().channel(group).message({'type':'normal', 'msg':'Você tem documento para assinar agora !'}).async(publish_callback)
@@ -142,7 +127,6 @@ def handle_login(user, password):
     global con,ldap_base
     query = "(uid=%s)" % user
     result = con.search_s(ldap_base, ldap.SCOPE_SUBTREE, query,['cn','mail','userPassword'])
-    print(query,result)
     if result:
         #Esse é a hash a ser comparada vinda do LDAP
         result = result[0][1]['userPassword'][0].decode('utf-8').split('}')[1]
@@ -160,14 +144,11 @@ def handle_login(user, password):
     else: return False
 
 def publish_callback(result, status):
-  print("resultado",result)
-  print("resultado",status)
   pass
 
 @app.before_request
 def before_request():
     g.user = None
-    print(request.path)
     if 'user' in session:
         g.userType = session['userType']
         g.user = session['user']
@@ -298,7 +279,7 @@ def verify(verify=None):
 
     cursor = db.cursor()
     docId = request.args['docId']
-    query = ("SELECT documents.fields as fields, documents.info as info, userdocs.signed as signed, userdocs.verifyOnly, userdocs.fieldsSign "
+    query = ("SELECT documents.fields as fields, documents.info as info, userdocs.signed as signed, userdocs.verifyOnly, userdocs.fieldsSign, documents.type "
             "from documents, userdocs "
             "where documents.type in (select userdocs.doc_type from userdocs where userdocs.id = %d) and userdocs.id = %d") % (int(docId), int(docId))
     result = cursor.execute(query)
@@ -313,9 +294,15 @@ def verify(verify=None):
         for x in range(0,len(fields)):
             fields[x] = fields[x] + ':' + fieldsValues[x]
         docInfo['fields'] = fields
+        docInfo['type'] = row[5]
 
     return render_template("verify.html",docinfo=docInfo)
 
+
+@app.route("/signout")
+def signout():
+    session.pop('user')
+    return redirect(url_for('index'))
 
 @app.route("/profile", methods=['GET','POST'])
 def profile(name=None):
@@ -462,10 +449,11 @@ def publish():
     global pubnub
     if request.method == 'POST':
         data = request.form.to_dict()
-        print(data)
     else :
         pubnub.publish().channel("adm_channel").message({'type': 'document_one', 'deadline': '12/12/2018'}).async(publish_callback)
         return "Publiquei !"
+
+
 
 @app.route("/download")
 def download(verify=None):
@@ -475,7 +463,6 @@ def download(verify=None):
 
     cursor = db.cursor()
     docId = request.args['docId']
-    print(docId)
     query = "SELECT d.id, d.doc_type, d.username, d.emitted, d.fieldsSign from userdocs d WHERE d.id = '{}'".format(docId)
     result = cursor.execute(query)
     docInfo = {}
@@ -485,7 +472,7 @@ def download(verify=None):
         docInfo['user'] = row[2]
         docInfo['emitted'] = row[3]
         docInfo['signature'] = row[4]
-    print(docInfo)
+
     try:
         return send_file(create_document('./src/util/doc_template.docx',
                                             doc_type=docInfo['docType'],
@@ -495,7 +482,7 @@ def download(verify=None):
                                             date=str(docInfo['emitted']),
                                             signature=encrypt_string(docInfo['signature'])),
                                         mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                        attachment_filename='churrasco.docx')
+                                        attachment_filename= docId+'.docx')
     except Exception as e:
         return str(e)
 

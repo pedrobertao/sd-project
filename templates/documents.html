@@ -44,14 +44,6 @@
 
                 {% endif %}
             </div>
-            <div class="download-button">
-              <form class="card-link" action="/download" method="GET">
-                <button class="btn btn-default" type="submit">
-                  <img src='{{ url_for('static', filename='img/b-download.png') }}' ></img> Download
-                </button>
-                <input class="" type="hidden" value="{{document.id}}" name="docId" />
-              </form>
-            </div>
         </div>
         {% endfor %}
     </div>

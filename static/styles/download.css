@@ -1,7 +1,7 @@
 .download-button{
-  position: absolute;
-  right:0;
-  top:0;
+  display: flex;
+  width: 200px;
+  flex-direction: row;
   margin-top: 10px;
   margin-right: 10px;
 }
