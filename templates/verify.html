@@ -17,16 +17,31 @@
     </div>
     <div class="container pt-3 bg-white container-box" style="margin-top:-15px">
         {# <h1>Seu documento</h1> #}
-        <iframe class="doc" src="{{docinfo.info}}"></iframe>
+        <div>
+            <h1>{{docinfo.type}}</h1>
+            <div>{{docinfo.info}}</div>
+        </div>
         {% if docinfo.sign %}
-        <p class="field">Campos preenchidos</p>
+        <div class="fields">
+        <h3 class="field">Campos preenchidos</h3>
         {%for f in docinfo.fields %}
         <p class="field">{{f}}</p>
         {% endfor %}
+        </div>
+
         {% else %}
         <button class="card-link btn btn-primary" type="submit" value="sign" name="sign">Assinar</button>
         {% endif %}
-        <button class="card-link btn btn-success" disabled type="submit" value="sign" name="sign">Assinado</button>
+        <div class="download-button">
+            <form class="card-link" action="/download" method="GET">
+            <button class="btn btn-default" type="submit">
+                <img src='{{ url_for('static', filename='img/b-download.png') }}'></img> Download
+            </button>
+            <input class="" type="hidden" value="{{docinfo.docId}}" name="docId" />
+            <input class="" type="hidden" value="{{docinfo.docId}}" name="docId" />
+            </form>
+            <button class="card-link btn btn-success" disabled type="submit" value="sign" name="sign">Assinado</button>
+        </div>
     </div>
     <script>
         const myDocs ='{{docinfo}}';

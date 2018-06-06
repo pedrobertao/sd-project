@@ -3,14 +3,16 @@ import re
 import hashlib
 
 def create_document(template_path, doc_type=None, topic=None, author=None, text=None, date=None, signature=None):
-    document = docx.Document('./media/templates/doc_template.docx')
+    if topic == 'Relatorio':
+        document = docx.Document('./media/templates/doc_template1.docx')
+    else:
+        document = docx.Document('./media/templates/doc_template2.docx')
+
     for paragraph in document.paragraphs:
         if(doc_type!=None):
             paragraph.text = re.sub(r'__TYPE__', doc_type, paragraph.text)
         if(topic!=None):
             paragraph.text = re.sub(r'__TOPIC__', topic, paragraph.text)
-        if(author!=None):
-            paragraph.text = re.sub(r'__TEXT__', text, paragraph.text)
         if(text!=None):
             paragraph.text = re.sub(r'__AUTHOR__', author, paragraph.text)
         if(date!=None):
@@ -21,7 +23,9 @@ def create_document(template_path, doc_type=None, topic=None, author=None, text=
     title = author+'-'+topic
     title = re.sub(' ','_',title)
     #document.save('{}.docx'.format(title))
-    return document
+    document.save('./media/docs/{}.docx'.format(title))
+
+    return './media/docs/{}.docx'.format(title)
 
 
 def encrypt_string(hash_string):

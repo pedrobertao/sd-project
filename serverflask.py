@@ -4,21 +4,12 @@ import mysql.connector
 from datetime import date
 from datetime import datetime
 import time
-from flask import Flask, request, session, render_template, redirect, g, url_for
+from flask import Flask, request, session, render_template, redirect, g, url_for, send_file
 from base64 import b64decode, b16encode
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 from pubnub.callbacks import SubscribeCallback
-from src.util import create_document 
-
-#TO DO
-# Alert to a single user <- MAYBE NOT
-# Alert custom messages <- DONE! 
-# Alert to another ADMINS <- Acho que da pra fazer isso já
-# Expires Date to Documents <-DONE !
-# Do logout
-# User can only send messages to groups OR users directly, not both
-
+from src.util import create_document, encrypt_string
 
 app = Flask(__name__)
 app.secret_key = 'trabalho_de_sd_2018'
@@ -30,7 +21,6 @@ ldap_base = "dc=sd,dc=com"
 con = ldap.initialize('ldap://127.0.0.1')
 my_password = 'admin'
 con.simple_bind_s("cn=admin,dc=sd,dc=com", my_password)
-# result = con.search_s(ldap_base, ldap.SCOPE_SUBTREE, query,['cn','mail','userPassword'])
 
 #PubNub
 global pubnub
@@ -51,17 +41,16 @@ global cursor;
 cursor = db.cursor()
 
 
-# print(documents)
 class MyListener(SubscribeCallback):
     def status(self, pubnub, status):
        pass
- 
+
     def message(self, pubnub, message):
         pass
- 
+
     def presence(self, pubnub, presence):
         pass
- 
+
 
 pubnub.add_listener(MyListener())
 
@@ -87,7 +76,7 @@ def handle_mark_as_verified(docId):
 def handle_insert_docs_users_only(users,docType,finalDate, verifyOnly):
     global db
     cursor = db.cursor()
-    user = session['user'] 
+    user = session['user']
     dateNow = int(time.time())
     queryValues = ""
 
@@ -95,7 +84,6 @@ def handle_insert_docs_users_only(users,docType,finalDate, verifyOnly):
         val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s ), " % (docType, u,dateNow,finalDate,verifyOnly)
         queryValues+= val
     finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly) values " + queryValues
-    print(finalQuery[:-2])
     cursor.execute(finalQuery[:-2])
     db.commit()
     return
@@ -104,7 +92,7 @@ def handle_insert_docs_users_only(users,docType,finalDate, verifyOnly):
 def handle_insert_docs(groups,docType,finalDate, verifyOnly):
     global db
     cursor = db.cursor()
-    user = session['user'] 
+    user = session['user']
     dateNow = int(time.time())
 
     querySearch = "select username from users where"
@@ -113,7 +101,7 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
 
 
     cursor.execute(querySearch[:-3])
-    users = [] 
+    users = []
     for row in cursor:
         users.append(row[0])
 
@@ -122,16 +110,13 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
         val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s ), " % (docType, u,dateNow,finalDate,verifyOnly)
         queryValues+= val
     finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly) values " + queryValues
-    print(finalQuery[:-2])
     cursor.execute(finalQuery[:-2])
     db.commit()
 
     return
-    
+
 
 def handle_publish_docs(groups):
-    print("Groups to Publish")
-    print(groups)
     global pubnub
     for group in groups:
         pubnub.publish().channel(group).message({'type':'normal', 'msg':'Você tem documento para assinar agora !'}).async(publish_callback)
@@ -142,7 +127,6 @@ def handle_login(user, password):
     global con,ldap_base
     query = "(uid=%s)" % user
     result = con.search_s(ldap_base, ldap.SCOPE_SUBTREE, query,['cn','mail','userPassword'])
-    print(query,result)
     if result:
         #Esse é a hash a ser comparada vinda do LDAP
         result = result[0][1]['userPassword'][0].decode('utf-8').split('}')[1]
@@ -160,14 +144,11 @@ def handle_login(user, password):
     else: return False
 
 def publish_callback(result, status):
-  print("resultado",result)
-  print("resultado",status)
   pass
 
 @app.before_request
 def before_request():
     g.user = None
-    print(request.path)
     if 'user' in session:
         g.userType = session['userType']
         g.user = session['user']
@@ -186,8 +167,8 @@ def index():
         if 'user' in session:
             return redirect(url_for('profile'))
     if request.method == 'POST':
-        user = request.form['username'] 
-        password = request.form['password'] 
+        user = request.form['username']
+        password = request.form['password']
         if handle_login(user,password):
             cursor = db.cursor()
             query = ("SELECT users.type, users.group from users where username ='%s'" % (user))
@@ -229,12 +210,12 @@ def documents(name=None):
             finalDate = datetime.strptime(str(row[6]),"%Y-%m-%d %H:%M:%S")
             if finalDate.date() < date.today() and doc['sign'] == None:
                 doc['finalDate'] = False
-            else: 
+            else:
                 doc['finalDate'] = row[6]
             doc['verifyOnly'] = row[7]
             doc['verified'] = row[8]
             documents.append(doc)
-            
+
         # print(documents)
 
         return render_template("documents.html", documents=documents)
@@ -250,7 +231,7 @@ def documents(name=None):
         else:
             return redirect(url_for('sign',docId = docId))
 
- 
+
 
 @app.route("/sign",methods=['GET', 'POST'])
 def sign(doc_id=None):
@@ -261,7 +242,7 @@ def sign(doc_id=None):
     userType = session['userType']
     if request.method == 'GET':
         cursor = db.cursor()
-        docId = request.args['docId'] 
+        docId = request.args['docId']
 
         query = ("SELECT documents.fields as fields, documents.info as info, userdocs.verifyOnly "
                 "from documents,userdocs "
@@ -274,10 +255,10 @@ def sign(doc_id=None):
             docInfo['fields'] = fields
             docInfo['info'] = row[1]
             docInfo['verifyOnly'] = row[2]
-    
+
         return render_template("sign.html",docinfo=docInfo)
 
-    else: 
+    else:
         dictInfo = request.form.to_dict()
         docId = request.form['docId']
         cursor = db.cursor()
@@ -295,10 +276,10 @@ def verify(verify=None):
     global db
     cursor = db.cursor()
     user = session['user']
-    
+
     cursor = db.cursor()
-    docId = request.args['docId'] 
-    query = ("SELECT documents.fields as fields, documents.info as info, userdocs.signed as signed, userdocs.verifyOnly, userdocs.fieldsSign "
+    docId = request.args['docId']
+    query = ("SELECT documents.fields as fields, documents.info as info, userdocs.signed as signed, userdocs.verifyOnly, userdocs.fieldsSign, documents.type "
             "from documents, userdocs "
             "where documents.type in (select userdocs.doc_type from userdocs where userdocs.id = %d) and userdocs.id = %d") % (int(docId), int(docId))
     result = cursor.execute(query)
@@ -313,23 +294,29 @@ def verify(verify=None):
         for x in range(0,len(fields)):
             fields[x] = fields[x] + ':' + fieldsValues[x]
         docInfo['fields'] = fields
+        docInfo['type'] = row[5]
 
     return render_template("verify.html",docinfo=docInfo)
 
+
+@app.route("/signout")
+def signout():
+    session.pop('user')
+    return redirect(url_for('index'))
 
 @app.route("/profile", methods=['GET','POST'])
 def profile(name=None):
     global db
     cursor = db.cursor()
-    userGroups = session['userGroups'].split(',');   
-    user = session['user'] 
+    userGroups = session['userGroups'].split(',');
+    user = session['user']
     userType = session['userType']
 
     if request.method == 'POST':
-        message = ('[%s]: '% user)+request.form['message'] 
+        message = ('[%s]: '% user)+request.form['message']
         groupsSelected = request.form.getlist('groups')
-        for group in groupsSelected: 
-            pubnub.publish().channel(group).message({'type':'normal', 'msg':message}).async(publish_callback)    
+        for group in groupsSelected:
+            pubnub.publish().channel(group).message({'type':'normal', 'msg':message}).async(publish_callback)
             if userType == 'user':
                 pubnub.publish().channel('adm_'+group).message({'type':'normal', 'msg':message}).async(publish_callback)
         return redirect(url_for('profile'))
@@ -347,7 +334,7 @@ def profile(name=None):
             admUser = 'adm_%s' % userGroups[0]
             userGroups.append(admUser)
 
-        result = cursor.execute(queryUsers) 
+        result = cursor.execute(queryUsers)
         userList = []
         for row in cursor:
             userList.append(row[0])
@@ -379,13 +366,13 @@ def publishdoc():
             groups = row[5].split(',')
             doc['groups'] = groups
             documents.append(doc)
-        
+
         queryUsers = ("SELECT users.username "
                             "FROM users "
                             "where ")
         for group in groups:
             queryUsers+= " users.group ='"+group +"' or"
-        
+
         queryUsers = queryUsers[:-3]
         result = cursor.execute(queryUsers)
         userList = []
@@ -398,11 +385,11 @@ def publishdoc():
         return render_template("publishdoc.html", documents = documents)
     else :
         dictInfo = request.form.to_dict()
-        docType = request.form['docType'] 
+        docType = request.form['docType']
 
         if 'verifyOnly' in dictInfo:
             verifyOnly = request.form['verifyOnly']
-        else: 
+        else:
             verifyOnly = False
 
         finalDate = request.form['finalDate']
@@ -441,11 +428,11 @@ def controldoc():
             doc['docType'] = row[1]
             doc['user'] = row[2]
             doc['signed'] = row[3]
-            doc['emitted'] = row[4] 
-            doc['finalDate'] = row[5] 
+            doc['emitted'] = row[4]
+            doc['finalDate'] = row[5]
             doc['admSign'] = row[7]
             doc['verified'] = row[8]
-            documents.append(doc)    
+            documents.append(doc)
         return render_template("controldoc.html", documents = documents)
     else:
         docId = request.form['docId']
@@ -462,10 +449,42 @@ def publish():
     global pubnub
     if request.method == 'POST':
         data = request.form.to_dict()
-        print(data)
     else :
         pubnub.publish().channel("adm_channel").message({'type': 'document_one', 'deadline': '12/12/2018'}).async(publish_callback)
         return "Publiquei !"
+
+
+
+@app.route("/download")
+def download(verify=None):
+    global db
+    cursor = db.cursor()
+    user = session['user']
+
+    cursor = db.cursor()
+    docId = request.args['docId']
+    query = "SELECT d.id, d.doc_type, d.username, d.emitted, d.fieldsSign from userdocs d WHERE d.id = '{}'".format(docId)
+    result = cursor.execute(query)
+    docInfo = {}
+    for row in cursor:
+        docInfo['docId'] = docId
+        docInfo['docType'] = row[1]
+        docInfo['user'] = row[2]
+        docInfo['emitted'] = row[3]
+        docInfo['signature'] = row[4]
+
+    try:
+        return send_file(create_document('./src/util/doc_template.docx',
+                                            doc_type=docInfo['docType'],
+                                            topic='TITULO',
+                                            author=docInfo['user'],
+                                            text='TEXTO',
+                                            date=str(docInfo['emitted']),
+                                            signature=encrypt_string(docInfo['signature'])),
+                                        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                        attachment_filename= docId+'.docx')
+    except Exception as e:
+        return str(e)
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -474,4 +493,3 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     app.run(host='localhost')
-
