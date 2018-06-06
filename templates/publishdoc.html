@@ -15,53 +15,63 @@
     <h1>Publicar</h1>
   </div>
 </div>
+
+{%for document in documents%}
 <div class="container container-box bg-white" style="margin-top:-15px">
-    {%for document in documents%}
-    <h4>Tópico: {{document.name}}</h4>
-    <h5>Tipo: {{document.type}}</h5>
-    <div class="row">
-        <div>{{document.info}}</div>
+    <div class="document-box">
+      <h4>Tópico: {{document.name}}</h4>
+      <hr>
+      <p>Tipo: {{document.type}}</p>
+      <div class="row">
+        <textarea name="name" rows="8" cols="80" style="width:100%" disabled >
+          {{document.info}}
+        </textarea>
+      </div>
+      <div class="row">
+          <div class="col">
+              <br>
+              <label><b>Campos do documento</b></label>
+              {% for f in document.fields%}
+              <span class="fields">{{f}}</span class="fields">
+              {% endfor %}
+          </div>
+      </div>
+      <hr>
+      <div class="row">
+          <form method="POST">
+              <div class="form-group p-2">
+                  <label>Grupos</label>
+                  <input type="hidden" value="{{document.type}}" name="docType" />
+                  <div class="form-check form-check-inline">
+                  {% for f in document.groups%}
+                  <input class="form-check-input" type="checkbox" name="groups" value="{{f}}"/>
+                  <label class="form-check-label" for="inlineCheckbox2">{{f}}</label>
+                  {% endfor %}
+                  </div>
+              </div>
+              <div class="form-group p-2">
+                  <label><b>Usuário</b></label>
+                  <input type="hidden" value="{{document.type}}" name="docType" />
+                  <div class="form-check form-check-inline">
+                  {% for u in document.userList %}
+                  <input class="form-check-input" type="checkbox" name="users" value="{{u}}"/>
+                  <label class="form-check-label" for="inlineCheckbox2">{{u}}</label>
+                  {% endfor %}
+                  </div>
+              </div>
+              <div class="form-group p-2">
+                  <label>DeadLine</label>
+                  <input class="form-control" type="date" name="finalDate" id="finalDate">
+              </div>
+              <div class="form-group p-2">
+                  <input class="form-check-label" type="checkbox" name="verifyOnly" value="true">Somente Leitura</input>
+              </div>
+              <button class="btn btn-primary" type="submit" value="publish" name="publish">Publicar</button>
+          </form>
+      </div>
     </div>
-    <div class="row">
-        <div class="col">
-            <label>Campos do documento</label>
-            {% for f in document.fields%}
-            <span class="fields">{{f}}</span class="fields">
-            {% endfor %}
-        </div>
-    </div>
-    <div class="row">
-        <form method="POST">
-            <div class="form-group">
-                <label>Grupos</label>
-                <input type="hidden" value="{{document.type}}" name="docType" />
-                <div class="form-check form-check-inline">
-                {% for f in document.groups%}
-                <input class="form-check-input" type="checkbox" name="groups" value="{{f}}"/>
-                <label class="form-check-label" for="inlineCheckbox2">{{f}}</label>
-                {% endfor %}
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Usuário</label>
-                <input type="hidden" value="{{document.type}}" name="docType" />
-                <div class="form-check form-check-inline">
-                {% for u in document.userList %}
-                <input class="form-check-input" type="checkbox" name="users" value="{{u}}"/>
-                <label class="form-check-label" for="inlineCheckbox2">{{u}}</label>
-                {% endfor %}
-                </div>
-            </div>
-            <div class="form-group">
-                <label>DeadLine</label>
-                <input class="form-control" type="date" name="finalDate" id="finalDate">
-            </div>
-            <div class="form-group">
-                <input class="form-check-label" type="checkbox" name="verifyOnly" value="true">Somente Leitura</input>
-            </div>
-            <button class="btn btn-primary" type="submit" value="publish" name="publish">Publicar</button>
-        </form>
-    </div>
-    {% endfor %}
-</div>
+  </div>
+  <br><br>
+{% endfor %}
+
 {% endblock %}

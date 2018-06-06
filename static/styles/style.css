@@ -111,7 +111,6 @@ button{
 
 }
 .sign-doc{
-    display: inline;
     margin: 10px 5px 10px 5px;
 }
 
@@ -135,4 +134,8 @@ button{
     display: flex;
     flex-direction: column;
     padding: 5px;
+}
+
+.document-box{
+  padding: 0 20px;
 }
