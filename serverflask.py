@@ -322,6 +322,7 @@ def profile(name=None):
         return redirect(url_for('profile'))
 
     else:
+        userList = []
         queryUsers = ("SELECT users.username "
                     "FROM users "
                         "where ")
@@ -332,15 +333,14 @@ def profile(name=None):
         else:
             queryUsers+= " users.group='%s' and users.username <> '%s'" %( userGroups[0] , user)
             admUser = 'adm_%s' % userGroups[0]
-            userGroups.append(admUser)
+            userList.append(admUser)
 
         result = cursor.execute(queryUsers)
-        userList = []
         for row in cursor:
             userList.append(row[0])
 
-        userGroups += userList
-        return render_template("profile.html",userGroups=userGroups)
+        print(queryUsers)
+        return render_template("profile.html",userGroups=userGroups,userList=userList)
 
 
 

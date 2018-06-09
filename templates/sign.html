@@ -10,9 +10,18 @@
     height: 300px;
     }   
 </style>
+    <div class="jumbotron mb-0">
+        <div class="container">
+          <h1>Assinar documentos</h1>
+        </div>
+    </div>
     <div class="container">
-        <h1>Analise seu documento</h1>
-        <iframe class="doc" src="{{docinfo.info}}"></iframe>
+        <div class="container pt-3 bg-white container-box" style="margin-top:-15px">
+        <h1>Analise e assine seu documento</h1>    
+        <div>
+            <h1>{{docinfo.type}}</h1>
+            <div>{{docinfo.info}}</div>
+        </div>
         {% if not docinfo.verifyOnly %}
         <div>
         <form method="POST">
@@ -28,6 +37,7 @@
         {% else %}
         <button class="card-link btn btn-success" disabled>Documento marcado como verificado!</button>
         {% endif %}
+        </div>
     </div>
     <script>
         const myDocs ='{{docinfo}}';
