@@ -44,6 +44,14 @@
                       </form>
                       {% endif %}
                   </td>
+                  <td class="sign-doc">
+                        <form class="card-link" action="/download" method="GET">
+                            <button class="btn btn-default" type="submit">
+                                <img src='{{ url_for('static', filename='img/b-download.png') }}'></img> Download
+                            </button>
+                            <input class="" type="hidden" value="{{document.docId}}" name="docId" />
+                        </form>
+                  </td>
               </tr>
               {% endfor %}
           </tbody>

@@ -4,7 +4,7 @@ import mysql.connector
 from datetime import date
 from datetime import datetime
 import time
-from flask import Flask, request, session, render_template, redirect, g, url_for, send_file
+from flask import Flask, request, session, render_template, redirect, g, url_for, send_file,send_from_directory
 from base64 import b64decode, b16encode
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
@@ -62,6 +62,23 @@ def handle_publish_to_admin(userGroup,user,docId):
     group = "adm_"+userGroup
     pubnub.publish().channel(group).message({'type':'normal', 'msg':message}).async(publish_callback)
 
+def handle_publish_docs(groups):
+    global pubnub
+    for group in groups:
+        pubnub.publish().channel(group).message({'type':'normal', 'msg':'Você tem documento para ser analisado !'}).async(publish_callback)
+
+def handle_publish_adm_sign(docId):
+    global pubnub
+    cursor = db.cursor()
+    query = "SELECT userdocs.username from userdocs where userdocs.id = %d " % int(docId)
+    cursor.execute(query)
+    for row in cursor:
+       userToPublish = row[0]
+
+    message = "Seu foi assinado pelo administrado %s e esta pronto" % session['userFullname'] 
+    pubnub.publish().channel(userToPublish).message({'type':'normal', 'msg':message}).async(publish_callback)
+
+
 def handle_mark_as_verified(docId):
     global db
     cursor = db.cursor()
@@ -77,13 +94,15 @@ def handle_insert_docs_users_only(users,docType,finalDate, verifyOnly):
     global db
     cursor = db.cursor()
     user = session['user']
+    userFullname = session['userFullname']
+
     dateNow = int(time.time())
     queryValues = ""
 
     for u in users:
-        val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s ), " % (docType, u,dateNow,finalDate,verifyOnly)
+        val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s, '%s' ), " % (docType, u,dateNow,finalDate,verifyOnly,userFullname)
         queryValues+= val
-    finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly) values " + queryValues
+    finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly, author) values " + queryValues
     cursor.execute(finalQuery[:-2])
     db.commit()
     return
@@ -93,6 +112,7 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
     global db
     cursor = db.cursor()
     user = session['user']
+    userFullname = session['userFullname']
     dateNow = int(time.time())
 
     querySearch = "select username from users where"
@@ -107,21 +127,13 @@ def handle_insert_docs(groups,docType,finalDate, verifyOnly):
 
     queryValues = ""
     for u in users:
-        val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s ), " % (docType, u,dateNow,finalDate,verifyOnly)
+        val = "( '%s', '%s',NULL, FROM_UNIXTIME(%s), '%s', %s, '%s' ), " % (docType, u,dateNow,finalDate,verifyOnly,userFullname)
         queryValues+= val
-    finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly) values " + queryValues
+    finalQuery = "INSERT into userdocs (doc_type, username, signed , emitted, finished, verifyOnly,author) values " + queryValues
     cursor.execute(finalQuery[:-2])
     db.commit()
-
     return
-
-
-def handle_publish_docs(groups):
-    global pubnub
-    for group in groups:
-        pubnub.publish().channel(group).message({'type':'normal', 'msg':'Você tem documento para assinar agora !'}).async(publish_callback)
-
-
+    
 
 def handle_login(user, password):
     global con,ldap_base
@@ -152,6 +164,7 @@ def before_request():
     if 'user' in session:
         g.userType = session['userType']
         g.user = session['user']
+        g.userFullname = ['userFullname']
         g.userGroups = session['userGroups']
     else:
         if request.path != '/' and '/static/' not in request.path:
@@ -171,17 +184,19 @@ def index():
         password = request.form['password']
         if handle_login(user,password):
             cursor = db.cursor()
-            query = ("SELECT users.type, users.group from users where username ='%s'" % (user))
+            query = ("SELECT users.type, users.group, users.fullname from users where username ='%s'" % (user))
             cursor = db.cursor()
             cursor.execute(query)
             for row in cursor:
                 userType = row[0]
                 groups = row[1].split(',')
                 userGroups = row[1]
+                userFullname = row[2]
 
             session['user'] = user
             session['userType'] = userType
             session['userGroups'] = userGroups
+            session['userFullname'] = userFullname
             return redirect(url_for('index'))
 
     return render_template("login.html")
@@ -224,7 +239,7 @@ def documents(name=None):
         docId = int(docId)
 
         dictInfo = request.form.to_dict()
-
+        print(dictInfo)
         handle_mark_as_verified(docId)
         if 'verify' in dictInfo:
             return redirect(url_for('verify',docId = docId))
@@ -263,7 +278,8 @@ def sign(doc_id=None):
         docId = request.form['docId']
         cursor = db.cursor()
         dateNow = int(time.time())
-        fields = ",".join(request.form.getlist('fields'))
+        fields = session['userFullname'] + ','
+        fields += ",".join(request.form.getlist('fields'))
         query= "UPDATE userdocs SET signed=FROM_UNIXTIME(%d),fieldsSign='%s' WHERE id=%d;" % (int(dateNow),fields,int(docId))
         result =  cursor.execute(query)
         db.commit()
@@ -313,6 +329,7 @@ def profile(name=None):
     userType = session['userType']
 
     if request.method == 'POST':
+        print("AHUAHUAHAUHAUH")
         message = ('[%s]: '% user)+request.form['message']
         groupsSelected = request.form.getlist('groups')
         for group in groupsSelected:
@@ -438,6 +455,7 @@ def controldoc():
         docId = request.form['docId']
         dateNow = int(time.time())
         query= "UPDATE userdocs SET admSign=FROM_UNIXTIME(%d) WHERE id=%d;" % (dateNow, int(docId))
+        handle_publish_adm_sign(docId)
         cursor = db.cursor()
         result = cursor.execute(query)
         db.commit()
@@ -463,7 +481,7 @@ def download(verify=None):
 
     cursor = db.cursor()
     docId = request.args['docId']
-    query = "SELECT d.id, d.doc_type, d.username, d.emitted, d.fieldsSign from userdocs d WHERE d.id = '{}'".format(docId)
+    query = "SELECT d.id, d.doc_type, d.username, d.emitted, d.fieldsSign,d.author,d.admSign from userdocs d WHERE d.id = '{}'".format(docId)
     result = cursor.execute(query)
     docInfo = {}
     for row in cursor:
@@ -471,18 +489,20 @@ def download(verify=None):
         docInfo['docType'] = row[1]
         docInfo['user'] = row[2]
         docInfo['emitted'] = row[3]
-        docInfo['signature'] = row[4]
+        docInfo['fields'] = row[4]
+        docInfo['author'] = row[5]
+        docInfo['admSign'] = row[6]
 
     try:
-        return send_file(create_document('./src/util/doc_template.docx',
-                                            doc_type=docInfo['docType'],
-                                            topic='TITULO',
-                                            author=docInfo['user'],
-                                            text='TEXTO',
-                                            date=str(docInfo['emitted']),
-                                            signature=encrypt_string(docInfo['signature'])),
-                                        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                        attachment_filename= docId+'.docx')
+        return send_file(create_document(docId=docId,
+                                        doc_type=docInfo['docType'],
+                                        topic=docInfo['docType'],
+                                        author=docInfo['author'],
+                                        date=str(docInfo['emitted']),
+                                        signature=encrypt_string(docInfo['fields']),
+                                        fields=docInfo['fields'],
+                                        admSign=str(docInfo['admSign'])),
+                                        as_attachment=True)
     except Exception as e:
         return str(e)
 
@@ -492,4 +512,4 @@ def page_not_found(e):
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
-    app.run(host='localhost')
+    app.run(host='0.0.0.0')

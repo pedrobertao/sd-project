@@ -71,7 +71,7 @@
 <body background="{{ url_for('static', filename='img/bg.png') }}">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="/">SD PROJECT</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarNavAltMarkup"
             aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -106,7 +106,8 @@
     var pubnub = new PubNub({
         subscribeKey: "sub-c-163d074e-4fa0-11e8-9b12-d6295e8dfe4d",
         publishKey: "pub-c-43a45a3e-507d-4731-aa9c-6fd3adb207fb",
-        ssl: false
+        ssl: false,
+        uuid: '{{g.user}}'
     });
     // Get the modal
     const modal = document.getElementById('myModal');
@@ -139,19 +140,7 @@
             var channelGroup = m.subscription;
             var pubTT = m.timetoken;
             var msg = m.message;
-
-            // myMsgs = localStorage.getItem('msg');
-            // if (!myMsgs) myMsgs = [];
-            // myMsgs.push(m.message);
-
-            // myMsgs.forEach(m => {
-            //     let msgH = document.createElement('h4')
-            //     msgH.innerText = JSON.stringify(m);
-            //     document.getElementById('msgs-container')
-            //         .appendChild(msgH);
-            // });
-
-            // localStorage.setItem('msg', myMsgs);
+            console.log(">>>>>>>>KKKKK CAI AQUI SIM MANO")
             modalText.innerText = m.message.msg
             modal.style.display = "block";
         },

@@ -12,12 +12,12 @@
 </style>
     <div class="jumbotron mb-0">
         <div class="container">
-          <h1>Assinar documentos</h1>
+          <h1>Análise de documentos</h1>
         </div>
     </div>
     <div class="container">
         <div class="container pt-3 bg-white container-box" style="margin-top:-15px">
-        <h1>Analise e assine seu documento</h1>    
+        <h1>Verifique seu documento</h1>    
         <div>
             <h1>{{docinfo.type}}</h1>
             <div>{{docinfo.info}}</div>
@@ -35,7 +35,15 @@
             <button type="submit" class="btn btn-primary mb-2" value="Assinar" name="sign">Assinar</button>
         </form>
         {% else %}
-        <button class="card-link btn btn-success" disabled>Documento marcado como verificado!</button>
+        <div class="download-button">
+            <form class="card-link" action="/download" method="GET">
+            <button class="btn btn-default" type="submit">
+                <img src='{{ url_for('static', filename='img/b-download.png') }}'></img> Download
+            </button>
+            <input class="" type="hidden" value="{{docinfo.docId}}" name="docId" />
+            </form>
+            <button class="card-link btn btn-success" disabled>Documento marcado como verificado!</button>
+        </div>
         {% endif %}
         </div>
     </div>
