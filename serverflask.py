@@ -18,8 +18,8 @@ app.templates_auto_reload = True
 #LDAP
 global con, ldap_base
 ldap_base = "dc=sd,dc=com"
-# con = ldap.initialize('ldap://200.235.90.181')
-# my_password = 'senha'
+#con = ldap.initialize('ldap://200.235.87.15')
+#my_password = 'senha'
 con = ldap.initialize('ldap://localhost')
 my_password = 'admin'
 con.simple_bind_s("cn=admin,dc=sd,dc=com", my_password)
@@ -77,7 +77,7 @@ def handle_publish_adm_sign(docId):
     for row in cursor:
        userToPublish = row[0]
 
-    message = "Seu foi assinado pelo administrado %s e esta pronto" % session['userFullname'] 
+    message = "O documento [%d] foi assinado pelo administrado %s e está validado." % (int(docId),session['userFullname']) 
     pubnub.publish().channel(userToPublish).message({'type':'normal', 'msg':message}).async(publish_callback)
 
 
@@ -212,7 +212,7 @@ def documents(name=None):
     if request.method == 'GET':
         query = ("SELECT userdocs.id as id,documents.type, userdocs.signed, documents.name, documents.fields , documents.info, userdocs.finished, userdocs.verifyOnly ,userdocs.verified "
                 "from userdocs, documents "
-                "where userdocs.username = %s and userdocs.doc_type = documents.type;")
+                "where userdocs.username = %s and userdocs.doc_type = documents.type  order by userdocs.id;")
         result =  cursor.execute(query,(user,))
         documents = []
         for row in cursor:
@@ -331,7 +331,6 @@ def profile(name=None):
     userType = session['userType']
 
     if request.method == 'POST':
-        print("AHUAHUAHAUHAUH")
         message = ('[%s]: '% user)+request.form['message']
         groupsSelected = request.form.getlist('groups')
         for group in groupsSelected:
@@ -437,7 +436,7 @@ def controldoc():
         for group in groups:
             querySearch+= " users.group ='"+group +"' or"
 
-        querySearch = querySearch[:-3] + ")"
+        querySearch = querySearch[:-3] + ") order by userdocs.id"
         cursor = db.cursor()
         result = cursor.execute(querySearch)
         documents = []

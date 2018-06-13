@@ -9,7 +9,7 @@ def create_document(docId=None,doc_type=None, topic=None, author=None,
     if admSign!='None':
         admSign = "Documento validado pelo Autor"
     else:
-        admSign = "Documento precisa ser valido pelo Autor"
+        admSign = "Documento precisa ser validado pelo Autor"
 
     if doc_type == 'Requerimento' or doc_type =='Documento':
         document = docx.Document('./media/templates/doc_template1.docx')
@@ -40,6 +40,8 @@ def create_document(docId=None,doc_type=None, topic=None, author=None,
                 paragraph.text = re.sub(r'__AUTHOR__', author, paragraph.text)
             if(date!=None):
                 paragraph.text = re.sub(r'__DATE__', date, paragraph.text)
+            if(date!=None):
+                paragraph.text = re.sub(r'__TEXT__', text, paragraph.text)
 
     
 

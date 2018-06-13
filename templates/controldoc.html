@@ -30,8 +30,20 @@
                   <td class="sign-doc">{{document.docId}}</td>
                   <td class="sign-doc">{{document.user}}</td>
                   <td class="sign-doc">{{document.docType}}</td>
-                  <td class="sign-doc">{{document.verified}}</td>
-                  <td class="sign-doc">{{document.signed}}</td>
+                  <td class="sign-doc">
+                      {%if document.verified %}
+                      {{document.verified}}
+                      {% else %}
+                      Não verificado
+                      {% endif %}
+                 </td>
+                  <td class="sign-doc">
+                      {%if document.signed %}
+                      {{document.signed}}
+                      {% else %}
+                      Não assinado
+                      {% endif %}
+                </td>
                   <td class="sign-doc">{{document.emitted}}</td>
                   <td class="sign-doc">{{document.finalDate}}</td>
                   <td class="sign-doc">
