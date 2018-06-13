@@ -18,7 +18,9 @@ app.templates_auto_reload = True
 #LDAP
 global con, ldap_base
 ldap_base = "dc=sd,dc=com"
-con = ldap.initialize('ldap://127.0.0.1')
+# con = ldap.initialize('ldap://200.235.90.181')
+# my_password = 'senha'
+con = ldap.initialize('ldap://localhost')
 my_password = 'admin'
 con.simple_bind_s("cn=admin,dc=sd,dc=com", my_password)
 
@@ -307,8 +309,8 @@ def verify(verify=None):
         docInfo['verifyOnly'] = row[3]
         fields = row[0].split(',')
         fieldsValues = row[4].split(',')
-        for x in range(0,len(fields)):
-            fields[x] = fields[x] + ':' + fieldsValues[x]
+        for x in range(1,len(fieldsValues)):
+            fields[x-1] = fields[x-1] + ':' + fieldsValues[x]
         docInfo['fields'] = fields
         docInfo['type'] = row[5]
 
@@ -447,6 +449,7 @@ def controldoc():
             doc['signed'] = row[3]
             doc['emitted'] = row[4]
             doc['finalDate'] = row[5]
+            doc['verifyOnly'] = row[6]
             doc['admSign'] = row[7]
             doc['verified'] = row[8]
             documents.append(doc)
@@ -481,7 +484,7 @@ def download(verify=None):
 
     cursor = db.cursor()
     docId = request.args['docId']
-    query = "SELECT d.id, d.doc_type, d.username, d.emitted, d.fieldsSign,d.author,d.admSign from userdocs d WHERE d.id = '{}'".format(docId)
+    query = "SELECT d.id, d.doc_type, d.username, d.emitted, d.fieldsSign,d.author,d.admSign,documents.info from userdocs d,documents WHERE d.id = '{}' and d.doc_type = documents.type;".format(docId)
     result = cursor.execute(query)
     docInfo = {}
     for row in cursor:
@@ -492,6 +495,7 @@ def download(verify=None):
         docInfo['fields'] = row[4]
         docInfo['author'] = row[5]
         docInfo['admSign'] = row[6]
+        docInfo['text'] = row[7]
 
     try:
         return send_file(create_document(docId=docId,
@@ -501,7 +505,8 @@ def download(verify=None):
                                         date=str(docInfo['emitted']),
                                         signature=encrypt_string(docInfo['fields']),
                                         fields=docInfo['fields'],
-                                        admSign=str(docInfo['admSign'])),
+                                        admSign=str(docInfo['admSign']),
+                                        text=docInfo['text']),
                                         as_attachment=True)
     except Exception as e:
         return str(e)

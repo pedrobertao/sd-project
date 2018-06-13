@@ -35,8 +35,12 @@
                   <td class="sign-doc">{{document.emitted}}</td>
                   <td class="sign-doc">{{document.finalDate}}</td>
                   <td class="sign-doc">
-                      {%if document.admSign %}
-                      <button class="card-link btn btn-success" disabled>Assinado</button>
+                      {%if document.admSign or document.verifyOnly %}
+                      {%if document.admSign%}
+                      <button class="card-link btn btn-success" disabled>
+                         Assinado
+                      </button>
+                      {%endif%}
                       {% else %}
                       <form method="POST">
                       <button class="card-link btn btn-primary" type="submit" value="{{document.docId}}" name="sign">Assinar</button>
